@@ -1,0 +1,126 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-image: url("/images/portada2.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.container {
+    width: 20%;
+    height: 100%;
+    margin: 0;
+    padding: 30px;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0 0 20px rgba(252, 249, 249, 0.938);
+    position: fixed;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 0; 
+    align-items: center;
+}
+.logo-container {
+    margin-bottom: 60px; /* Espacio entre el logo y el título */
+}
+
+.logo {
+    max-width: 190px; /* Ajusta este valor según el tamaño que desees */
+    height: auto;
+    display: block;
+    margin: 0 auto; /* Centra el logo horizontalmente */
+}
+
+h1 {
+    text-align: center;
+    color: #ecab48;
+    margin-bottom: 40px;
+    font-size: px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #444;
+    font-weight: bold;
+}
+
+input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d49814;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+input[type="email"]:focus, input[type="password"]:focus {
+    border-color: #db811a;
+    outline: none;
+}
+
+input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #12254e;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.5s;
+}
+
+button:hover {
+    background-color: #e69d17;
+}
+
+p {
+    text-align: center;
+    margin-top: 20px;
+    color: #111764;
+}
+p1 {
+    text-align: center;
+    margin-top: 20px;
+    color: #444444;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #073d77;
+    text-decoration: underline;
+}
+
+#forgotPassword {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    color: #6c757d;
+}
+p.copyright {
+    position: fixed;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    text-align:justify;
+    font-size: 12px;
+    color: #666;
+}
