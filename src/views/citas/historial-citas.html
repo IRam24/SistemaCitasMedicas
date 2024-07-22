@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="/views/funcionalidad_styles/historial-cita.css">
+<div class="historial-citas-container">
+    <h2>Historial de Citas</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Especialidad</th>
+                <th>Médico</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="lista-citas">
+            <!-- Las citas se cargarán aquí dinámicamente -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal para editar cita -->
+<div id="editarCitaModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Editar Cita</h3>
+        <form id="formEditarCita">
+            <input type="hidden" id="editCitaId" name="id_cita">
+            <div class="form-group">
+                <label for="editFecha">Fecha:</label>
+                <input type="date" id="editFecha" name="fecha" required>
+            </div>
+            <div class="form-group">
+                <label for="editHora">Hora:</label>
+                <select id="editHora" name="hora" required>
+                    <option value="">Seleccione hora</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="editMotivo">Motivo:</label>
+                <textarea id="editMotivo" name="motivo" rows="4" required></textarea>
+            </div>
+            <button type="submit">Actualizar Cita</button>
+        </form>
+    </div>
+</div>

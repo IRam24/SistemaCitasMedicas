@@ -46,24 +46,6 @@ router.get('/registro/registro.js', (req, res) => {
     });
 });
 
-// Ruta para la página de menu
-router.get('/menu', (req, res) => {
-    res.sendFile(path.join(__dirname, '../menu/menu.html'));
-});
-
-// Ruta para el CSS de menu
-router.get('/menu/menu.css', (req, res) => {
-    res.sendFile(path.join(__dirname, '../menu/menu.css'), { 
-        headers: { 'Content-Type': 'text/css' } 
-    });
-});
-
-// Ruta para el JS de menu
-router.get('/menu/menu.js', (req, res) => {
-    res.sendFile(path.join(__dirname, '../menu/menu.js'), { 
-        headers: { 'Content-Type': 'application/javascript' } 
-    });
-});
 // Ruta para servir imágenes
 router.get('/images/:imageName', (req, res) => {
     res.sendFile(path.join(__dirname, `../images/${req.params.imageName}`));

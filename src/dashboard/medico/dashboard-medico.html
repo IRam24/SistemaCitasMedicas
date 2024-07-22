@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Médico - Sistema de Citas Médicas</title>
+    <link rel="stylesheet" href="/*dashboard/dashboard.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bienvenido, Doctor</h1>
+            <p id="nombreUsuario"></p>
+        </header>
+        <nav>
+            <ul>
+                <li><a href="#" onclick="cargarContenido('agenda')">Agenda Médica</a></li>
+                <li><a href="#" onclick="cargarContenido('horario')">Horario Disponible</a></li>
+                <li><a href="#" onclick="cargarContenido('especialidad')">Mi Especialidad</a></li>
+            </ul>
+        </nav>
+        <main id="contenido-principal">
+            <!-- Aquí se cargará el contenido dinámicamente -->
+        </main>
+    </div>
+
+    <script src="/dashboard/dashboard-medico.js"></script>
+</body>
+</html>

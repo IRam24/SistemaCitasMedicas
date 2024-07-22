@@ -1,0 +1,64 @@
+<div class="gestion-usuarios-container">
+    <h2>Gestión de Usuarios y Citas</h2>
+    
+    <div class="busqueda-usuarios">
+        <input type="text" id="buscar-usuario" placeholder="Buscar usuario...">
+        <button onclick="buscarUsuarios()">Buscar</button>
+    </div>
+
+    <table id="tabla-usuarios">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="lista-usuarios">
+            <!-- Los usuarios se cargarán aquí dinámicamente -->
+        </tbody>
+    </table>
+
+    <div id="modal-citas" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Citas del Paciente: <span id="nombre-paciente"></span></h3>
+            <button onclick="mostrarFormularioNuevaCita()">Crear Nueva Cita</button>
+            <table id="tabla-citas">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Especialidad</th>
+                        <th>Médico</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-citas">
+                    <!-- Las citas se cargarán aquí dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="modal-editar-cita" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Editar Cita</h3>
+            <form id="form-editar-cita">
+                <input type="hidden" id="editar-cita-id">
+                <label for="editar-fecha">Fecha:</label>
+                <input type="date" id="editar-fecha" required>
+                <label for="editar-hora">Hora:</label>
+                <select id="editar-hora" required></select>
+                <label for="editar-especialidad">Especialidad:</label>
+                <select id="editar-especialidad" required></select>
+                <label for="editar-medico">Médico:</label>
+                <select id="editar-medico" required></select>
+                <button type="submit">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+</div>
