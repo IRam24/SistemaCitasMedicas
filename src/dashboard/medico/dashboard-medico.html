@@ -3,27 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú Médico - Sistema de Citas Médicas</title>
-    <link rel="stylesheet" href="/*dashboard/dashboard.css">
+    <title>Dashboard Médico - Sistema de Citas Médicas</title>
+    <link rel="stylesheet" href="/dashboard/dashboard.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Bienvenido, Doctor</h1>
-            <p id="nombreUsuario"></p>
-        </header>
-        <nav>
-            <ul>
-                <li><a href="#" onclick="cargarContenido('agenda')">Agenda Médica</a></li>
-                <li><a href="#" onclick="cargarContenido('horario')">Horario Disponible</a></li>
-                <li><a href="#" onclick="cargarContenido('especialidad')">Mi Especialidad</a></li>
-            </ul>
-        </nav>
-        <main id="contenido-principal">
-            <!-- Aquí se cargará el contenido dinámicamente -->
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo-container">
+                <img src="/images/logo sga.png" alt="Logo del Sistema" class="logo">
+            </div>
+            <h2>HOSPITAL ISIDRO AYORA</h2>
+            <nav>
+                <ul>
+                    <li><button class="menu-button" data-content="gestion-citas">Gestión de Citas</button></li>
+                    <li><button class="menu-button" data-content="gestion-disponibilidad">Gestionar Disponibilidad</button></li>
+                    <li><button class="menu-button" data-content="perfil-medico">Mi Perfil</button></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header>
+                <h1>SISTEMA DE CITAS MÉDICAS</h1>
+                <p id="nombreMedico">Bienvenido, Dr.</p>
+            </header>
+            <div id="contenido-principal">
+                <!-- Aquí se cargará el contenido dinámicamente -->
+            </div>
         </main>
     </div>
 
-    <script src="/dashboard/dashboard-medico.js"></script>
+    <script src="/dashboard/medico/dashboard-medico.js"></script>
 </body>
 </html>

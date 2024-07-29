@@ -43,7 +43,7 @@ async function cargarContenido(seccion) {
                 scriptUrl = '/dashboard/administrador/gestion-usuarios.js';
                 break;
             case 'gestion-especialidades':
-                html = await fetch('/views/gestion-especialidades.html').then(res => res.text());
+                html = await fetch('/views/admin/gestion-especialidades.html').then(res => res.text());
                 scriptUrl = '/dashboard/administrador/gestion-especialidades.js';
                 break;
             case 'gestion-consultorios':
@@ -51,8 +51,8 @@ async function cargarContenido(seccion) {
                 scriptUrl = '/dashboard/administrador/gestion-consultorios.js';
                 break;
             case 'estadisticas':
-                html = await fetch('/views/estadisticas.html').then(res => res.text());
-                scriptUrl = '/dashboard/administrador/estadisticas.js';
+                html = await fetch('/views/admin/gestion-estadisticas.html').then(res => res.text());
+                scriptUrl = '/dashboard/administrador/gestion-estadisticas.js';
                 break;
             default:
                 contenido.innerHTML = '<p>Sección no encontrada</p>';

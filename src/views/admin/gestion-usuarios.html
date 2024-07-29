@@ -1,64 +1,102 @@
-<div class="gestion-usuarios-container">
-    <h2>Gestión de Usuarios y Citas</h2>
-    
-    <div class="busqueda-usuarios">
-        <input type="text" id="buscar-usuario" placeholder="Buscar usuario...">
-        <button onclick="buscarUsuarios()">Buscar</button>
+<link rel="stylesheet" href="/views/funcionalidad_styles/gestion-usuarios.css">
+<div class="usuarios-container">
+    <h1>Gestión de Usuarios</h1>
+
+    <button id="btnNuevoUsuario" class="btn btn-primary">Nuevo Usuario</button>
+
+    <div id="formularioUsuario" style="display:none;">
+        <h2 id="formularioTitulo">Nuevo Usuario</h2>
+        <form id="formUsuario">
+            <input type="hidden" id="id_usuario" name="id_usuario">
+            
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="apellido">Apellido:</label>
+                <input type="text" id="apellido" name="apellido" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="ci">Número de cédula:</label>
+                <input type="text" id="ci" name="ci" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Número de teléfono:</label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="direccion">Domicilio:</label>
+                <input type="text" id="direccion" name="direccion" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="fechanacimiento">Fecha de nacimiento:</label>
+                <input type="date" id="fechanacimiento" name="fechanacimiento" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="rol">Rol:</label>
+                <select id="rol" name="rol" required>
+                    <option value="">Seleccionar rol</option>
+                    <!-- Las opciones se cargarán dinámicamente -->
+                </select>
+            </div>
+            
+            <div id="camposMedico" style="display: none;">
+                <div class="form-group">
+                    <label for="especialidad">Especialidad:</label>
+                    <select id="especialidad" name="id_especialidad">
+                        <option value="">Seleccionar especialidad</option>
+                        <!-- Las opciones se cargarán dinámicamente -->
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-success">Guardar Usuario</button>
+            <button type="button" id="btnCancelar" class="btn btn-secondary">Cancelar</button>
+        </form>
     </div>
 
-    <table id="tabla-usuarios">
+    <div id="error-mensaje" style="display: none; color: red;"></div>
+    <div id="exito-mensaje" style="display: none; color: green;"></div>
+    
+    <div class="filtro-container">
+        <label for="filtroUsuarios">Filtrar por:</label>
+        <select id="filtroUsuarios">
+            <option value="todos">Todos</option>
+            <option value="paciente">Pacientes</option>
+            <option value="medico">Médicos</option>
+        </select>
+    </div>
+
+    <table id="tablaUsuarios">
         <thead>
             <tr>
                 <th>Nombre</th>
                 <th>Apellido</th>
                 <th>Email</th>
+                <th>Rol</th>
+                <th>Especialidad</th>
                 <th>Acciones</th>
             </tr>
         </thead>
-        <tbody id="lista-usuarios">
-            <!-- Los usuarios se cargarán aquí dinámicamente -->
+        <tbody>
+            <!-- Los datos de los usuarios se cargarán aquí dinámicamente -->
         </tbody>
     </table>
-
-    <div id="modal-citas" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>Citas del Paciente: <span id="nombre-paciente"></span></h3>
-            <button onclick="mostrarFormularioNuevaCita()">Crear Nueva Cita</button>
-            <table id="tabla-citas">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>Especialidad</th>
-                        <th>Médico</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="lista-citas">
-                    <!-- Las citas se cargarán aquí dinámicamente -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="modal-editar-cita" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>Editar Cita</h3>
-            <form id="form-editar-cita">
-                <input type="hidden" id="editar-cita-id">
-                <label for="editar-fecha">Fecha:</label>
-                <input type="date" id="editar-fecha" required>
-                <label for="editar-hora">Hora:</label>
-                <select id="editar-hora" required></select>
-                <label for="editar-especialidad">Especialidad:</label>
-                <select id="editar-especialidad" required></select>
-                <label for="editar-medico">Médico:</label>
-                <select id="editar-medico" required></select>
-                <button type="submit">Guardar Cambios</button>
-            </form>
-        </div>
-    </div>
 </div>

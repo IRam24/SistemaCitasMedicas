@@ -49,7 +49,7 @@ app.use(helmet({
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
       "default-src": ["'self'"],
-      "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net"],
       "style-src": ["'self'", "'unsafe-inline'"],
       "img-src": ["'self'", "data:", "blob:"],
     },
@@ -73,6 +73,13 @@ pool.getConnection()
 const indexRouter = require('./routes/index');
 const apiRouter = require('./routes/api');
 
+const Chart = require('chart.js/auto');
+if (typeof window !== 'undefined') {
+    window.Chart = Chart;
+} else {
+    global.Chart = Chart;
+}
+
 // Usar rutas
 app.use('/', indexRouter);
 app.use('/api', apiRouter);
@@ -94,7 +101,7 @@ app.get('/dashboard/administrador', (req, res) => {
 app.use('/dashboard', express.static(path.join(__dirname, 'dashboard')));
 app.use('/views/citas', express.static(path.join(__dirname, 'views', 'citas')));
 app.use('/views/admin', express.static(path.join(__dirname, 'views', 'admin')));
-
+app.use('/views/medico', express.static(path.join(__dirname, 'views', 'medico')));
 // Manejo de errores global
 app.use((err, req, res, next) => {
   console.error(err.stack);

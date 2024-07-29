@@ -237,7 +237,92 @@ const citasController = {
         } finally {
             connection.release();
         }
-    }
+    },
+
+    getMedicoCitas: async (req, res) => {
+        try {
+            if (!req.session || !req.session.user || req.session.user.rol !== 'medico') {
+                return res.status(401).json({ message: 'No autorizado o no es un médico' });
+            }
+    
+            const id_medico = req.session.user.id_usuario;
+            const { estado } = req.query;
+    
+            let query = `
+                SELECT 
+                c.id_cita, c.fecha, c.hora, c.motivo, c.estado,
+                up.nombre AS nombre_paciente, up.apellido AS apellido_paciente,
+                e.detalle_especialidad,
+                um.nombre AS nombre_medico, um.apellido AS apellido_medico
+            FROM citas c
+            JOIN pacientes p ON c.id_paciente = p.id_paciente
+            JOIN usuario up ON p.id_usuario = up.id_usuario
+            JOIN medicos m ON c.id_medico = m.id_usuario
+            JOIN usuario um ON m.id_usuario = um.id_usuario
+            JOIN especialidades e ON m.id_especialidad = e.id_especialidad
+            WHERE c.id_medico = ?
+            `;
+    
+            const queryParams = [id_medico];
+    
+            if (estado) {
+                query += ' AND c.estado = ?';
+                queryParams.push(estado);
+            }
+    
+            query += ' ORDER BY c.fecha ASC, c.hora ASC';
+    
+            const [citas] = await pool.query(query, queryParams);
+            res.json(citas);
+        } catch (error) {
+            console.error('Error al obtener citas del médico:', error);
+            res.status(500).json({ message: 'Error en el servidor', error: error.message });
+        }
+    },
+
+    actualizarEstadoCita: async (req, res) => {
+        try {
+            const { id_cita } = req.params;
+            const { estado } = req.body;
+            const id_medico = req.session.user.id_usuario; // Asegurarse de que el médico solo pueda actualizar sus propias citas
+    
+            const [result] = await pool.query(
+                'UPDATE citas SET estado = ? WHERE id_cita = ? AND id_medico = ?',
+                [estado, id_cita, id_medico]
+            );
+    
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Cita no encontrada o no autorizada para actualizar' });
+            }
+    
+            res.json({ message: 'Estado de la cita actualizado con éxito' });
+        } catch (error) {
+            console.error('Error al actualizar estado de la cita:', error);
+            res.status(500).json({ message: 'Error en el servidor', error: error.message });
+        }
+    },
+
+    cancelarCita: async (req, res) => {
+        try {
+            const { id } = req.params;
+            
+            const [result] = await pool.query(
+                'UPDATE citas SET estado = "cancelada" WHERE id_cita = ?',
+                [id]
+            );
+    
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Cita no encontrada' });
+            }
+    
+            res.json({ message: 'Cita cancelada con éxito' });
+        } catch (error) {
+            console.error('Error al cancelar la cita:', error);
+            res.status(500).json({ message: 'Error en el servidor', error: error.message });
+        }
+    },
+
+
 };
 
 module.exports = citasController;

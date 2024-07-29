@@ -1,28 +1,13 @@
 const API_BASE_URL = 'http://localhost:3000';
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('registroForm');
     const submitButton = form.querySelector('button[type="submit"]');
-    const rolSelect = document.getElementById('asign_role');
-    const especialidadDiv = document.getElementById('especialidad-div');
-    const especialidadSelect = document.getElementById('especialidad');
 
-    if (!form || !submitButton || !rolSelect || !especialidadDiv || !especialidadSelect) {
+    if (!form || !submitButton) {
         console.error('Uno o más elementos del formulario no se encontraron');
         return;
     }
-
-    // Cargar roles disponibles
-    cargarRoles();
-
-    // Evento para mostrar/ocultar el campo de especialidad
-    rolSelect.addEventListener('change', function() {
-        if (this.value === 'medico') {
-            especialidadDiv.style.display = 'block';
-            cargarEspecialidades();
-        } else {
-            especialidadDiv.style.display = 'none';
-        }
-    });
 
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -37,10 +22,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
         const fechanacimiento = document.getElementById('fechanacimiento').value;
-        const rol = rolSelect.value;
+        const rol = 'paciente'; // Rol fijo para pacientes
 
         // Validaciones
-        if (!nombre || !apellido || !ci || !phone || !email || !direccion || !password || !confirmPassword || !fechanacimiento || !rol) {
+        if (!nombre || !apellido || !ci || !phone || !email || !direccion || !password || !confirmPassword || !fechanacimiento) {
             mostrarError('Todos los campos son obligatorios');
             return;
         }
@@ -68,16 +53,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Objeto con los datos del usuario
         const usuario = { nombre, apellido, ci, phone, email, direccion, password, fechanacimiento, rol };
 
-        // Añadir especialidad si el rol es médico
-        if (rol === 'medico') {
-            const especialidadId = especialidadSelect.value;
-            if (!especialidadId) {
-                mostrarError('Debe seleccionar una especialidad para médicos');
-                return;
-            }
-            usuario.especialidadId = especialidadId;
-        }
-
         // Deshabilitar el botón y mostrar carga
         submitButton.disabled = true;
         submitButton.textContent = 'Procesando...';
@@ -95,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 mostrarError(resultado.message || 'Hubo un problema con el registro');
             }
         } catch (error) {
-            mostrarError('Error en el registro.....: ' + error.message);
+            mostrarError('Error en el registro: ' + error.message);
         } finally {
             submitButton.disabled = false;
             submitButton.textContent = 'Registrarse';
@@ -177,60 +152,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error detallado:', error);
             throw error;
-        }
-    }
-
-    async function cargarRoles() {
-        try {
-            console.log('Iniciando carga de roles');
-            const rolSelect = document.getElementById('asign_role');
-            if (!rolSelect) {
-                throw new Error('Elemento select de roles no encontrado');
-            }
-    
-            console.log('Haciendo fetch a /api/roles');
-            const response = await fetch('/api/roles');
-            console.log('Respuesta recibida:', response);
-            
-            if (!response.ok) {
-                throw new Error(`Error al cargar roles: ${response.status} ${response.statusText}`);
-            }
-            
-            const roles = await response.json();
-            console.log('Roles recibidos:', roles);
-    
-            rolSelect.innerHTML = '<option value="">Seleccione un rol</option>';
-            roles.forEach(rol => {
-                const option = document.createElement('option');
-                option.value = rol.asign_role;
-                option.textContent = rol.asign_role;
-                rolSelect.appendChild(option);
-            });
-            console.log('Roles cargados en el select');
-        } catch (error) {
-            console.error('Error detallado al cargar roles:', error);
-            mostrarError('Error al cargar roles. Por favor, intente más tarde.');
-        }
-    }
-
-    async function cargarEspecialidades() {
-        try {
-            const response = await fetch('/api/especialidades');
-            if (!response.ok) {
-                throw new Error(`Error al cargar especialidades: ${response.status} ${response.statusText}`);
-            }
-            const especialidades = await response.json();
-            const especialidadSelect = document.getElementById('especialidad');
-            especialidadSelect.innerHTML = '<option value="">Seleccione una especialidad</option>';
-            especialidades.forEach(esp => {
-                const option = document.createElement('option');
-                option.value = esp.id_especialidad;
-                option.textContent = esp.nombre;
-                especialidadSelect.appendChild(option); 
-            });
-        } catch (error) {
-            console.error('Error detallado al cargar especialidades:', error);
-            mostrarError('Error al cargar especialidades. Por favor, intente más tarde.');
         }
     }
 });

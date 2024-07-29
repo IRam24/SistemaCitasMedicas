@@ -1,0 +1,140 @@
+.especialidades-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+h2, h3, h4 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.nueva-especialidad, .editar-especialidad {
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 30px;
+}
+
+#formNuevaEspecialidad, #formEditarEspecialidad {
+    display: flex;
+    gap: 10px;
+}
+
+input[type="text"] {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.lista-especialidades ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.lista-especialidades li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #e9e9e9;
+    margin-bottom: 5px;
+    border-radius: 4px;
+}
+
+.lista-especialidades li:hover {
+    background-color: #d4d4d4;
+}
+
+.btn-editar, .btn-eliminar {
+    padding: 5px 10px;
+    margin-left: 5px;
+    font-size: 0.9em;
+}
+
+.btn-editar {
+    background-color: #2196F3;
+}
+
+.btn-editar:hover {
+    background-color: #0b7dda;
+}
+
+.btn-eliminar {
+    background-color: #f44336;
+}
+
+.btn-eliminar:hover {
+    background-color: #da190b;
+}
+
+.detalles-especialidad {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+    margin-top: 30px;
+}
+
+#listaMedicos {
+    list-style-type: none;
+    padding: 0;
+}
+
+#listaMedicos li {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+#listaMedicos li:last-child {
+    border-bottom: none;
+}
+
+.editar-especialidad {
+    display: none;
+}
+
+#cancelarEdicion {
+    background-color: #f44336;
+}
+
+#cancelarEdicion:hover {
+    background-color: #da190b;
+}
+
+/* Estilos responsivos */
+@media (max-width: 600px) {
+    #formNuevaEspecialidad, #formEditarEspecialidad {
+        flex-direction: column;
+    }
+
+    button {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .lista-especialidades li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .lista-especialidades li button {
+        margin-top: 10px;
+        width: 100%;
+    }
+}

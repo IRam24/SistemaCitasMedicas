@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="/views/funcionalidad_styles/gestionar-especialidades.css">
+
+<div class="especialidades-container">
+    <h2>Gestión de Especialidades</h2>
+    
+    <div class="nueva-especialidad">
+        <h3>Agregar Nueva Especialidad</h3>
+        <form id="formNuevaEspecialidad">
+            <input type="text" id="nombreEspecialidad" name="detalle_especialidad" placeholder="Detalle de la especialidad" required>
+            <button type="submit">Agregar Especialidad</button>
+        </form>
+    </div>
+
+    <div class="lista-especialidades">
+        <h3>Especialidades Registradas</h3>
+        <ul id="listaEspecialidades">
+            <!-- Las especialidades se cargarán aquí dinámicamente -->
+        </ul>
+    </div>
+
+    <div class="editar-especialidad" style="display:none;">
+        <h3>Editar Especialidad</h3>
+        <form id="formEditarEspecialidad">
+            <input type="hidden" id="editarIdEspecialidad" name="id_especialidad">
+            <input type="text" id="editarNombreEspecialidad" name="detalle_especialidad" required>
+            <button type="submit">Guardar Cambios</button>
+            <button type="button" id="cancelarEdicion">Cancelar</button>
+        </form>
+    </div>
+
+    <div class="detalles-especialidad" style="display:none;">
+        <h3>Detalles de la Especialidad: <span id="nombreEspecialidadDetalle"></span></h3>
+        <h4>Médicos en esta especialidad:</h4>
+        <ul id="listaMedicos">
+            <!-- Los médicos se cargarán aquí dinámicamente -->
+        </ul>
+    </div>
+</div>

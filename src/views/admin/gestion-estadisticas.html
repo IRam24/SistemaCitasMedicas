@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="/views/funcionalidad_styles/gestion-estadisticas.css">
+<div class="estadisticas-container">
+    <h1>Estadísticas de Citas y Diagnósticos</h1>
+    
+    <div class="filtro-container">
+        <label for="estado-filtro">Filtrar por estado:</label>
+        <select id="estado-filtro">
+            <option value="">Todos</option>
+            <option value="programada">Programada</option>
+            <option value="completada">Completada</option>
+            <option value="cancelada">Cancelada</option>
+        </select>
+        <button id="btn-aplicar-filtro" class="btn btn-primary">Aplicar Filtro</button>
+    </div>
+
+    <div class="grafico-container">
+        <canvas id="grafico-diagnosticos"></canvas>
+    </div>
+
+    <div class="tabla-container">
+        <h2>Lista de Citas y Diagnósticos</h2>
+        <table id="tabla-citas">
+            <thead>
+                <tr>
+                    <th>Fecha y Hora</th>
+                    <th>Paciente</th>
+                    <th>Médico</th>
+                    <th>Especialidad</th>
+                    <th>Motivo</th>
+                    <th>Estado</th>
+                    <th>Diagnóstico</th>
+                    <th>Tratamiento</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpo-tabla-citas">
+                <!-- Aquí se cargarán los datos de las citas -->
+            </tbody>
+        </table>
+    </div>
+</div>

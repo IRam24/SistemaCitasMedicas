@@ -150,16 +150,28 @@ if (rol === 'medico') {
   // Obtener todos los usuarios (solo para administradores)
   getAll: async (req, res) => {
     try {
-      if (req.session.user.rol !== 'administrador') {
-        return res.status(403).json({ message: 'Acceso denegado' });
-      }
-      const [users] = await pool.query('SELECT u.*, r.asign_role as rol FROM usuario u JOIN roles r ON u.rol = r.id');
-      res.json(users);
+        const filtro = req.query.filtro || 'todos';
+        let query = `
+            SELECT u.id_usuario, u.nombre, u.apellido, u.email, r.asign_role as rol 
+            FROM usuario u 
+            JOIN roles r ON u.rol = r.id
+            LEFT JOIN medicos m ON u.id_usuario = m.id_usuario
+            LEFT JOIN especialidades e ON m.id_especialidad = e.id_especialidad
+        `;
+
+        if (filtro !== 'todos') {
+            query += ` WHERE r.asign_role = ?`;
+        }
+
+        const [users] = await pool.query(query, filtro !== 'todos' ? [filtro] : []);
+        
+        console.log(`Usuarios obtenidos (${filtro}):`, users);
+        res.json(users);
     } catch (error) {
-      console.error('Error al obtener usuarios:', error);
-      res.status(500).json({ message: 'Error en el servidor' });
+        console.error('Error al obtener usuarios:', error);
+        res.status(500).json({ message: 'Error en el servidor al obtener usuarios' });
     }
-  },
+},
 
   // Obtener un usuario por ID
   getById: async (req, res) => {
@@ -212,6 +224,50 @@ if (rol === 'medico') {
       res.status(500).json({ message: 'Error en el servidor' });
     }
   },
+  
+  createUser: async (req, res) => {
+    const { nombre, apellido, email, password, rol, id_especialidad } = req.body;
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Primero, obtenemos el ID del rol basado en el nombre del rol proporcionado
+        const [roles] = await connection.query('SELECT id FROM roles WHERE asign_role = ?', [rol]);
+        if (roles.length === 0) {
+            throw new Error('Rol no válido');
+        }
+        const rolId = roles[0].id;
+
+        // Insertar en la tabla usuario con el ID del rol
+        const [userResult] = await connection.query(
+            'INSERT INTO usuario (nombre, apellido, email, password, rol) VALUES (?, ?, ?, ?, ?)',
+            [nombre, apellido, email, password, rolId]
+        );
+
+        if (rol === 'medico' && id_especialidad) {
+            // Insertar en la tabla medicos si el rol es médico
+            await connection.query(
+                'INSERT INTO medicos (id_usuario, id_especialidad) VALUES (?, ?)',
+                [userResult.insertId, id_especialidad]
+            );
+        } else if (rol === 'paciente') {
+            // Insertar en la tabla pacientes si el rol es paciente
+            await connection.query(
+                'INSERT INTO pacientes (id_usuario) VALUES (?)',
+                [userResult.insertId]
+            );
+        }
+
+        await connection.commit();
+        res.status(201).json({ message: 'Usuario creado con éxito', id: userResult.insertId });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error al crear usuario:', error);
+        res.status(500).json({ message: 'Error al crear usuario: ' + error.message });
+    } finally {
+        connection.release();
+    }
+},
 
   // Cerrar sesión
   logout: (req, res) => {
@@ -222,6 +278,28 @@ if (rol === 'medico') {
       res.json({ success: true, message: 'Sesión cerrada con éxito' });
     });
   },
+
+  getMedicoPerfil: async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [perfil] = await pool.query(`
+            SELECT u.id_usuario, u.nombre, u.apellido, u.email, e.detalle_especialidad
+            FROM usuario u
+            JOIN medicos m ON u.id_usuario = m.id_usuario
+            JOIN especialidades e ON m.id_especialidad = e.id_especialidad
+            WHERE u.id_usuario = ?
+        `, [id]);
+
+        if (perfil.length === 0) {
+            return res.status(404).json({ message: 'Perfil de médico no encontrado' });
+        }
+
+        res.json(perfil[0]);
+    } catch (error) {
+        console.error('Error al obtener perfil del médico:', error);
+        res.status(500).json({ message: 'Error en el servidor', error: error.message });
+    }
+},
 
   getDashboardData: async (req, res) => {
       try {
@@ -238,11 +316,11 @@ if (rol === 'medico') {
                   id: userId,
                   nombre: req.session.user.nombre,
                   rol: userRole
-              },
+    },
               statistics: {}
           };
 
-          switch(userRole) {
+          /*switch(userRole) {
               case 'administrador':
                   dashboardData.menuItems = [
                       { name: 'Gestionar Usuarios', url: '/administrador/users.js' },
@@ -284,7 +362,7 @@ if (rol === 'medico') {
                   dashboardData.menuItems = [
                       { name: 'Mi Perfil', url: '/perfil.js' }
                   ];
-          }
+          }*/
 
           res.json(dashboardData);
       } catch (error) {

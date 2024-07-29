@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro - Sistema de Citas Médicas</title>
+    <title>Registro de Paciente - Sistema de Citas Médicas</title>
     <link rel="stylesheet" href="registro.css">
 </head>
 <body>
     <div class="container">
-        <h1>Registro de Usuario</h1>
+        <h1>Registro de Paciente</h1>
         <form id="registroForm">
             <div id="error-mensaje" style="display: none; color: red;"></div>
             <div id="exito-mensaje" style="display: none; color: green;"></div>
@@ -22,11 +22,11 @@
                 <input type="text" id="apellido" name="apellido" required>
             </div>
             <div class="form-group">
-                <label for="ci">Numero de cédula:</label>
+                <label for="ci">Número de cédula:</label>
                 <input type="number" id="ci" name="ci" required>
             </div>
             <div class="form-group">
-                <label for="phone">Numero de teléfono:</label>
+                <label for="phone">Número de teléfono:</label>
                 <input type="tel" id="phone" name="phone" required>
             </div>
             <div class="form-group">
@@ -49,18 +49,7 @@
                 <label for="fechanacimiento">Fecha de nacimiento:</label>
                 <input type="date" id="fechanacimiento" name="fechanacimiento" required>
             </div>
-            <div class="form-group">
-                <label for="asign_role">Rol:</label>
-                <select id="asign_role" name="asign_role" required>
-                    <option value="">Seleccione un rol</option>
-                </select>
-            </div>
-            <div id="especialidad-div" style="display: none;">
-                <label for="especialidad">Especialidad:</label>
-                <select id="especialidad" name="especialidad">
-                    <option value="">Seleccione una especialidad</option>          
-                </select>
-            </div>
+            <input type="hidden" id="asign_role" name="asign_role" value="paciente">
             <button type="submit">Registrarse</button>
         </form>
         <p>¿Ya tienes una cuenta? <a href="/">Ingresar</a></p>
