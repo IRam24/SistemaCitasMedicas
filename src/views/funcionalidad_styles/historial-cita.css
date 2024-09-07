@@ -1,3 +1,4 @@
+
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
@@ -8,60 +9,38 @@ body {
 }
 
 .historial-citas-container {
-    max-width: 1000px;
-    margin: 0 auto;
     background-color: #fff;
     padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 h2 {
     color: #2c3e50;
-    text-align: center;
     margin-bottom: 20px;
 }
 
-#tabla-citas {
+table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
 }
 
-#tabla-citas th, 
-#tabla-citas td {
+th, td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #ddd;
 }
 
-#tabla-citas th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-
-#tabla-citas tr:hover {
-    background-color: #f5f5f5;
-}
-
-.btn-editar,
-.btn-eliminar {
-    padding: 5px 10px;
-    margin: 2px;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.btn-editar {
+th {
     background-color: #3498db;
     color: white;
 }
 
-.btn-eliminar {
-    background-color: #e74c3c;
-    color: white;
+tr:hover {
+    background-color: #f5f5f5;
 }
 
 /* Estilos para el modal */
@@ -84,8 +63,8 @@ h2 {
     border: 1px solid #888;
     width: 80%;
     max-width: 500px;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .close {
@@ -94,29 +73,34 @@ h2 {
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
-    transition: color 0.3s ease;
 }
 
 .close:hover,
 .close:focus {
     color: #000;
     text-decoration: none;
+    cursor: pointer;
 }
 
-/* Estilos para el formulario */
+/* Estilos para el formulario dentro del modal */
+#formEditarCita {
+    display: flex;
+    flex-direction: column;
+}
+
 .form-group {
     margin-bottom: 15px;
 }
 
-.form-group label {
+label {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
 }
 
-.form-group input[type="date"],
-.form-group select,
-.form-group textarea {
+input[type="date"],
+select,
+textarea {
     width: 100%;
     padding: 8px;
     border: 1px solid #ddd;
@@ -124,11 +108,7 @@ h2 {
     box-sizing: border-box;
 }
 
-.form-group textarea {
-    resize: vertical;
-}
-
-button[type="submit"] {
+button {
     background-color: #3498db;
     color: white;
     padding: 10px 15px;
@@ -136,28 +116,20 @@ button[type="submit"] {
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
-    transition: background-color 0.3s ease;
 }
 
-button[type="submit"]:hover {
+button:hover {
     background-color: #2980b9;
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
-    #tabla-citas {
+@media screen and (max-width: 600px) {
+    table {
         font-size: 14px;
     }
 
-    #tabla-citas th, 
-    #tabla-citas td {
+    th, td {
         padding: 8px;
-    }
-
-    .btn-editar,
-    .btn-eliminar {
-        padding: 3px 6px;
-        font-size: 12px;
     }
 
     .modal-content {

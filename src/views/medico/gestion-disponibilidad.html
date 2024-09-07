@@ -1,0 +1,54 @@
+<link rel="stylesheet" href="/views/funcionalidad_styles/gestion-disponibilidad.css">
+<div class="agendar-cita-container">
+    <h2>Agendar Nueva Cita para Paciente</h2>
+    
+    <div class="busqueda-paciente">
+        <h3>Buscar Paciente</h3>
+        <form id="formBusquedaPaciente">
+            <div class="form-group">
+                <label for="ciPaciente">CI del Paciente:</label>
+                <input type="text" id="ciPaciente" name="ciPaciente" required>
+                <button type="submit">Buscar</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="infoPaciente" class="info-paciente" style="display: none;">
+        <!-- La información del paciente se mostrará aquí -->
+    </div>
+
+    <form id="formAgendarCita" style="display: none;">
+        <input type="hidden" id="idPaciente" name="id_paciente">
+        <div class="form-group">
+            <label for="especialidad">Especialidad:</label>
+            <select id="especialidad" name="id_especialidad" required>
+                <option value="">Seleccione una especialidad</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="medico">Médico:</label>
+            <select id="medico" name="id_medico" required>
+                <option value="">Seleccione un médico</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="fecha">Fecha:</label>
+            <input type="date" id="fecha" name="fecha" required>
+        </div>
+        <div class="form-group">
+            <label for="hora">Hora:</label>
+            <select id="hora" name="hora" required>
+                <option value="">Seleccione una hora</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="motivo">Motivo de la consulta:</label>
+            <textarea id="motivo" name="motivo" rows="4" required></textarea>
+        </div>
+        <button type="submit">Agendar Cita</button>
+    </form>
+</div>
+
+<div id="mensaje" class="mensaje" style="display: none;"></div>
+
+   

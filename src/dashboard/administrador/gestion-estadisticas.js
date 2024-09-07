@@ -160,6 +160,5 @@ async function generarGraficoDiagnosticos(citas) {
 }
 
 document.addEventListener('DOMContentLoaded', setupEventListeners);
-//document.addEventListener('DOMContentLoaded', inicializar);
 cargarEstadisticas();
 setupEventListeners();

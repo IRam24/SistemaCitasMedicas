@@ -2,8 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     cargarInfoUsuario();
     setupMenuListeners();
     cargarContenidoInicial();
-    //cargarHistorialCitas();
-
 });
 
 function cargarInfoUsuario() {
@@ -42,7 +40,7 @@ async function cargarContenido(seccion) {
                 cargarHistorialCitas();
                 break;
             case 'especialidades':
-                html = await fetch('/views/especialidades/lista-especialidades.html').then(res => res.text());
+                html = await fetch('/views/citas/lista-especialidades.html').then(res => res.text());
                 contenido.innerHTML = html;
                 cargarListaEspecialidades();
                 break;
@@ -83,10 +81,16 @@ async function cargarMedicos() {
     const especialidadId = document.getElementById('especialidad').value;
     const medicoSelect = document.getElementById('medico');
     medicoSelect.innerHTML = '<option value="">Seleccione médico</option>';
+    
     if (!especialidadId) return;
-
+    
     try {
-        const medicos = await fetch(`/api/medicos-por-especialidad/${especialidadId}`).then(res => res.json());
+        const response = await fetch(`/api/medicos-por-especialidad/${especialidadId}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const medicos = await response.json();
+        
         medicos.forEach(medico => {
             const option = document.createElement('option');
             option.value = medico.id_usuario;
@@ -95,6 +99,7 @@ async function cargarMedicos() {
         });
     } catch (error) {
         console.error('Error al cargar médicos:', error);
+        // Aquí podrías mostrar un mensaje de error al usuario
     }
 }
 
@@ -190,16 +195,16 @@ async function cargarHistorialCitas() {
         citas.forEach(cita => {
             const fila = document.createElement('tr');
             fila.innerHTML = `
-                <td>${formatearFecha(cita.fecha)}</td>
-                <td>${cita.hora}</td>
-                <td>${cita.detalle_especialidad}</td>
-                <td>Dr/a. ${cita.nombre_medico} ${cita.apellido_medico}</td>
-                <td>${cita.estado}</td>
-                <td>
-                    <button class="btn-editar" data-id="${cita.id_cita}">Editar</button>
-                    <button class="btn-eliminar" data-id="${cita.id_cita}">Eliminar</button>
-                </td>
-            `;
+    <td data-label="Fecha">${formatearFecha(cita.fecha)}</td>
+    <td data-label="Hora">${cita.hora}</td>
+    <td data-label="Especialidad">${cita.nombre}</td>
+    <td data-label="Médico">Dr/a. ${cita.nombre_medico} ${cita.apellido_medico}</td>
+    <td data-label="Estado">${cita.estado}</td>
+    <td data-label="Acciones">
+        <button class="btn-editar" data-id="${cita.id_cita}">Editar</button>
+        <button class="btn-eliminar" data-id="${cita.id_cita}">Eliminar</button>
+    </td>
+`;
             tablaCitas.appendChild(fila);
         });
     } catch (error) {
@@ -247,7 +252,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Botón de cerrar modal no encontrado');
     }
 
-    // Agregar event listeners a los botones de editar y eliminar
     document.addEventListener('click', function(event) {
         if (event.target.classList.contains('btn-editar')) {
             const idCita = event.target.getAttribute('data-id');
@@ -379,22 +383,63 @@ async function eliminarCita(idCita) {
         }
     }
 }
+document.addEventListener('DOMContentLoaded', () => {
+    cargarListaEspecialidades();
+});
+
+async function cargarListaEspecialidades() {
+    try {
+        const listaEspecialidades = document.getElementById('lista-especialidades');
+        if (!listaEspecialidades) {
+            console.error('Elemento #lista-especialidades no encontrado en el DOM');
+            return;
+        }
+
+        const response = await fetch('/api/especialidades');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const especialidades = await response.json();
+        console.log('Especialidades y médicos recibidos:', especialidades);
+
+        if (especialidades.length === 0) {
+            listaEspecialidades.innerHTML = '<p>No hay especialidades disponibles.</p>';
+            return;
+        }
+
+        let contenidoHTML = '<ul class="lista-especialidades">';
+        especialidades.forEach(esp => {
+            contenidoHTML += `
+                <li class="especialidad-item">
+                    <div class="especialidad-info">
+                        <h3>${esp.nombre}</h3>
+                        <p>${esp.detalle_especialidad || 'Sin detalle'}</p>
+                    </div>
+                    <div class="medicos-info">
+                        <h4>Médicos (${esp.medicos ? esp.medicos.length : 0}):</h4>
+                        <ul class="lista-medicos">
+                            ${esp.medicos ? esp.medicos.map(medico => `
+                                <li>${medico.nombre} ${medico.apellido}</li>
+                            `).join('') : 'No hay médicos asignados'}
+                        </ul>
+                    </div>
+                </li>
+            `;
+        });
+        contenidoHTML += '</ul>';
+
+        listaEspecialidades.innerHTML = contenidoHTML;
+    } catch (error) {
+        console.error('Error al cargar lista de especialidades y médicos:', error);
+        const listaEspecialidades = document.getElementById('lista-especialidades');
+        if (listaEspecialidades) {
+            listaEspecialidades.innerHTML = `<p>Error al cargar la información: ${error.message}</p>`;
+        }
+    }
+}
+
 
 function cerrarModal() {
     document.getElementById('editarCitaModal').style.display = 'none';
 }
 
-async function cargarListaEspecialidades() {
-    try {
-        const especialidades = await fetch('/api/especialidades').then(res => res.json());
-        const listaEspecialidades = especialidades.map(esp => `
-            <li>${esp.detalle_especialidad}</li>
-        `).join('');
-        document.getElementById('lista-especialidades').innerHTML = `
-            <ul>${listaEspecialidades}</ul>
-        `;
-    } catch (error) {
-        console.error('Error al cargar lista de especialidades:', error);
-        document.getElementById('lista-especialidades').innerHTML = '<p>Error al cargar la lista de especialidades.</p>';
-    }
-}

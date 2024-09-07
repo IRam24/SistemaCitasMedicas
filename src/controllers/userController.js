@@ -320,50 +320,6 @@ if (rol === 'medico') {
               statistics: {}
           };
 
-          /*switch(userRole) {
-              case 'administrador':
-                  dashboardData.menuItems = [
-                      { name: 'Gestionar Usuarios', url: '/administrador/users.js' },
-                      { name: 'Gestionar Roles', url: '/administrador/roles.js' },
-                      { name: 'Ver Estadísticas', url: '/administrador/stats.js' }
-                  ];
-                  // Obtener estadísticas para admin
-                  const [userCount] = await pool.query('SELECT COUNT(*) as count FROM usuario');
-                  const [citasCount] = await pool.query('SELECT COUNT(*) as count FROM citas');
-                  dashboardData.statistics = {
-                      totalUsers: userCount[0].count,
-                      totalCitas: citasCount[0].count
-                  };
-                  break;
-              case 'medico':
-                  dashboardData.menuItems = [
-                      { name: 'Ver Mis Citas', url: '/medico/citas.js' },
-                      { name: 'Gestionar Disponibilidad', url: '/medico/disponibilidad.js' }
-                  ];
-                  // Obtener estadísticas para médico
-                  const [doctorCitas] = await pool.query('SELECT COUNT(*) as count FROM citas WHERE id_medico = ?', [userId]);
-                  dashboardData.statistics = {
-                      misCitas: doctorCitas[0].count
-                  };
-                  break;
-              case 'paciente':
-                  dashboardData.menuItems = [
-                      { name: 'Agendar Cita', url: '/paciente/agendar.js' },
-                      { name: 'Mis Citas', url: '/paciente/mis-citas.js' },
-                      { name: 'Mi Perfil', url: '/paciente/perfil.js' }
-                  ];
-                  // Obtener estadísticas para paciente
-                  const [pacienteCitas] = await pool.query('SELECT COUNT(*) as count FROM citas WHERE id_paciente = ?', [userId]);
-                  dashboardData.statistics = {
-                      misCitas: pacienteCitas[0].count
-                  };
-                  break;
-              default:
-                  dashboardData.menuItems = [
-                      { name: 'Mi Perfil', url: '/perfil.js' }
-                  ];
-          }*/
-
           res.json(dashboardData);
       } catch (error) {
           console.error('Error al obtener datos del dashboard:', error);

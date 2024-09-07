@@ -80,9 +80,15 @@ if (typeof window !== 'undefined') {
     global.Chart = Chart;
 }
 
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 // Usar rutas
 app.use('/', indexRouter);
 app.use('/api', apiRouter);
+app.use('/', apiRouter);
 
 // Ruta para el dashboard
 app.get('/dashboard/paciente', (req, res) => {

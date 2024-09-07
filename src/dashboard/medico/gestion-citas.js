@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    //document.getElementById('formDiagnostico').addEventListener('submit', registrarDiagnostico);
     cargarCitasMedico();
     setupEventListeners();
 });
@@ -7,31 +6,18 @@ document.addEventListener('DOMContentLoaded', function() {
 function setupEventListeners() {
     const btnFiltrar = document.getElementById('btn-filtrar');
     if (btnFiltrar) {
-        btnFiltrar.addEventListener('click', cargarCitasMedico);
+        btnFiltrar.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevenir el comportamiento por defecto del botón
+            cargarCitasMedico();
+        });
     }
 
-    const formDiagnostico = document.getElementById('formDiagnostico');
-    if (formDiagnostico) {
-        formDiagnostico.addEventListener('submit', registrarDiagnostico);
-    }
-
-    const btnRegresar = document.getElementById('btnRegresar');
-    if (btnRegresar) {
-        btnRegresar.addEventListener('click', cerrarModalDiagnostico);
-    }
-
-    const btnCancelarCita = document.getElementById('btnCancelarCita');
-    if (btnCancelarCita) {
-        btnCancelarCita.addEventListener('click', cancelarCita);
+    // Agregar evento de cambio al select de filtro
+    const selectFiltro = document.getElementById('estado-filtro');
+    if (selectFiltro) {
+        selectFiltro.addEventListener('change', cargarCitasMedico);
     }
 }
-
-document.querySelectorAll('.btn-dar-cita').forEach(button => {
-    button.addEventListener('click', function() {
-        const idCita = this.getAttribute('data-id-cita');
-        abrirModalDiagnostico(idCita);
-    });
-  });
 
 async function cargarCitasMedico() {
     const estadoFiltro = document.getElementById('estado-filtro').value;
@@ -76,7 +62,7 @@ function mostrarCitasEnTabla(citas) {
             <td>${formatearFecha(cita.fecha)}</td>
             <td>${cita.hora}</td>
             <td>${cita.nombre_paciente} ${cita.apellido_paciente}</td>
-            <td>${cita.detalle_especialidad}</td>
+            <td>${cita.nombre}</td>
             <td>${cita.motivo}</td>
             <td>${cita.estado}</td>
             <td>
@@ -92,7 +78,13 @@ function mostrarCitasEnTabla(citas) {
     // Añadir event listeners a los botones "Dar Cita"
     document.querySelectorAll('.btn-dar-cita').forEach(button => {
         button.addEventListener('click', function() {
-            abrirModalDiagnostico(this.getAttribute('data-id-cita'));
+            const idCita = this.getAttribute('data-id-cita');
+            if (typeof window.cargarDashboardPaciente === 'function') {
+                window.cargarDashboardPaciente(idCita);
+            } else {
+                console.error('La función cargarDashboardPaciente no está disponible');
+                alert('Error al cargar el dashboard del paciente. Por favor, intente de nuevo.');
+            }
         });
     });
 }
@@ -102,83 +94,8 @@ function formatearFecha(fechaISO) {
     return fecha.toLocaleDateString('es-ES');
 }
 
-function abrirModalDiagnostico(idCita) {
-    document.getElementById('cita-id').value = idCita;
-    document.getElementById('modalDiagnostico').style.display = 'block';
-}
 
-function cerrarModalDiagnostico() {
-    document.getElementById('modalDiagnostico').style.display = 'none';
-}
-
-async function cancelarCita() {
-    const idCita = document.getElementById('cita-id').value;
-    if (!confirm('¿Está seguro de que desea cancelar esta cita?')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/api/citas/${idCita}/cancelar`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Error al cancelar la cita');
-        }
-
-        alert('Cita cancelada con éxito');
-        cerrarModalDiagnostico();
-        cargarCitasMedico(); // Recargar la lista de citas
-    } catch (error) {
-        console.error('Error al cancelar la cita:', error);
-        alert('Error al cancelar la cita. Por favor, intente de nuevo.');
-    }
-}
-
-async function registrarDiagnostico(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const diagnosticoData = Object.fromEntries(formData);
-    /*{
-        id_cita: formData.get('id_cita'),
-        sintomas: formData.get('sintomas'),
-        diagnostico: formData.get('diagnostico'),
-        tratamiento: formData.get('tratamiento'),
-        observaciones: formData.get('observaciones')
-    };*/
-
-    console.log('Datos del diagnóstico a enviar:', diagnosticoData);
-
-    try {
-        const response = await fetch('/api/diagnosticos', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(diagnosticoData)
-        });
-
-        if (!response.ok) {
-            throw new Error('Error al guardar el diagnóstico');
-        }
-
-        alert('Diagnóstico guardado con éxito');
-        ocultarModalDiagnostico();
-        cargarCitasMedico(); // Recargar las citas
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al guardar el diagnóstico');
-    }
-}
-
-function ocultarModalDiagnostico() {
-    document.getElementById('modalDiagnostico').style.display = 'none';
-}
-
-// Asegúrate de llamar a setupEventListeners cuando el DOM esté cargado
 document.addEventListener('DOMContentLoaded', setupEventListeners);
-    cargarCitasMedico();
-    setupEventListeners();
+setupEventListeners();
+cargarCitasMedico();
+

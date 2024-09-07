@@ -1,64 +1,34 @@
 <link rel="stylesheet" href="/views/funcionalidad_styles/gestion-citas.css">
 <div class="citas-container">
-    <h1>Gestión de Citas Médicas</h1>
+    <h1>Agenda de Citas Médicas</h1>
     
-    <div class="filtro-container">
-        <label for="estado-filtro">Filtrar por estado:</label>
-        <select id="estado-filtro">
-            <option value="">Todos</option>
-            <option value="programada">Programada</option>
-            <option value="completada">Completada</option>
-            <option value="cancelada">Cancelada</option>
-        </select>
-        <button id="btn-filtrar" class="btn btn-primary">Aplicar Filtro</button>
-    </div>
-
-    <table id="tablaCitas">
-        <thead>
-            <tr>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Paciente</th>
-                <th>Especialidad</th>
-                <th>Motivo</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="cuerpo-tabla-citas">
-            <!-- Aquí se cargarán dinámicamente las citas -->
-        </tbody>
-    </table>
-
-    <!-- Modal para registrar diagnóstico -->
-    <div id="modalDiagnostico" class="modal" style="display:none;">
-        <div class="modal-content">
-            <h2>Registrar Diagnóstico</h2>
-            <form id="formDiagnostico">
-                <input type="hidden" id="cita-id" name="id_cita">
-                <input type="hidden" id="paciente-id" name="id_paciente">
-                <input type="hidden" id="medico-id" name="id_medico">
-                <div class="form-group">
-                    <label for="sintomas">Síntomas:</label>
-                    <textarea id="sintomas" name="sintomas" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="diagnostico">Diagnóstico:</label>
-                    <textarea id="diagnostico" name="diagnostico" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="tratamiento">Tratamiento:</label>
-                    <textarea id="tratamiento" name="tratamiento" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="observaciones">Observaciones:</label>
-                    <textarea id="observaciones" name="observaciones"></textarea>
-                    <div class="button-group">
-                        <button type="submit" class="btn btn-success">Guardar Diagnóstico</button>
-                        <button type="button" class="btn btn-secondary" id="btnRegresar">Regresar</button>
-                        <button type="button" class="btn btn-danger" id="btnCancelarCita">Cancelar Cita</button>
-                    </div>
-            </form>
+    <div id="vista-citas">
+        <div class="filtro-container">
+            <label for="estado-filtro">Filtrar por estado:</label>
+            <select id="estado-filtro">
+                <option value="">Todos</option>
+                <option value="programada">Programada</option>
+                <option value="completada">Completada</option>
+                <option value="cancelada">Cancelada</option>
+            </select>
+            <button id="btn-filtrar" class="btn btn-primary">Aplicar Filtro</button>
         </div>
+
+        <table id="tablaCitas">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Paciente</th>
+                    <th>Especialidad</th>
+                    <th>Motivo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr> 
+            </thead>
+            <tbody id="cuerpo-tabla-citas">
+                <!-- Aquí se cargarán dinámicamente las citas -->
+            </tbody>
+        </table>
     </div>
 </div>

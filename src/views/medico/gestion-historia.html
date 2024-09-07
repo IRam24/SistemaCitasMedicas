@@ -1,0 +1,24 @@
+<button id="btn-historia-medica" class="btn btn-primary">Registrar Historia Médica</button>
+
+<div id="modal-historia-medica" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Registro de Historia Médica</h2>
+        <form id="form-historia-medica">
+            <input type="hidden" id="id_paciente" name="id_paciente">
+            <div class="form-group">
+                <label for="tipo_sangre">Tipo de Sangre:</label>
+                <input type="text" id="tipo_sangre" name="tipo_sangre" required>
+            </div>
+            <div class="form-group">
+                <label for="alergias">Alergias:</label>
+                <textarea id="alergias" name="alergias"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="cirugias">Cirugías Previas:</label>
+                <textarea id="cirugias" name="cirugias"></textarea>
+            </div>
+            <button type="submit">Guardar Historia Médica</button>
+        </form>
+    </div>
+</div>

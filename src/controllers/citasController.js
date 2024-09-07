@@ -15,7 +15,7 @@ const citasController = {
                     c.hora,
                     c.motivo,
                     c.estado,
-                    e.detalle_especialidad,
+                    e.nombre,
                     u.nombre AS nombre_medico,
                     u.apellido AS apellido_medico
                 FROM citas c
@@ -74,30 +74,43 @@ const citasController = {
             connection = await pool.getConnection();
             await connection.beginTransaction();
     
-            const { id_usuario, id_especialidad, id_medico, fecha, hora, motivo } = req.body;
-            console.log('Datos de la cita recibidos:', { id_usuario, id_especialidad, id_medico, fecha, hora, motivo });
+            const { id_paciente, id_usuario, id_especialidad, id_medico, fecha, hora, motivo } = req.body;
+            console.log('Datos de la cita recibidos:', { id_paciente, id_usuario, id_especialidad, id_medico, fecha, hora, motivo });
     
             // Validación de datos
-            if (!id_usuario || !id_especialidad || !id_medico || !fecha || !hora || !motivo) {
+            if ((!id_paciente && !id_usuario) || !id_especialidad || !id_medico || !fecha || !hora || !motivo) {
                 throw new Error('Faltan datos requeridos para la cita');
             }
-            if (id_usuario === 'null') {
-                throw new Error('ID de usuario no válido');
+    
+            let paciente_id;
+    
+            if (id_paciente) {
+                // Si se proporciona id_paciente, verificamos que exista
+                const [pacienteExiste] = await connection.query(
+                    'SELECT id_paciente FROM pacientes WHERE id_paciente = ?',
+                    [id_paciente]
+                );
+                if (pacienteExiste.length === 0) {
+                    throw new Error('No se encontró un paciente con el ID proporcionado');
+                }
+                paciente_id = id_paciente;
+            } else if (id_usuario) {
+                // Si se proporciona id_usuario, buscamos el id_paciente correspondiente
+                const [pacientes] = await connection.query(
+                    'SELECT id_paciente FROM pacientes WHERE id_usuario = ?',
+                    [id_usuario]
+                );
+                console.log('Resultado de la búsqueda de paciente:', pacientes);
+    
+                if (pacientes.length === 0) {
+                    throw new Error('No se encontró un paciente para este usuario');
+                }
+                paciente_id = pacientes[0].id_paciente;
+            } else {
+                throw new Error('Se requiere id_paciente o id_usuario');
             }
     
-            // Obtener el id_paciente
-            const [pacientes] = await connection.query(
-                'SELECT id_paciente FROM pacientes WHERE id_usuario = ?',
-                [id_usuario]
-            );
-            console.log('Resultado de la búsqueda de paciente:', pacientes);
-    
-            if (pacientes.length === 0) {
-                throw new Error('No se encontró un paciente para este usuario');
-            }
-    
-            const id_paciente = pacientes[0].id_paciente;
-            console.log('ID de paciente encontrado:', id_paciente);
+            console.log('ID de paciente a utilizar:', paciente_id);
     
             // Verificar disponibilidad de la cita
             const [citasExistentes] = await connection.query(
@@ -113,24 +126,24 @@ const citasController = {
             // Insertar la nueva cita
             const [result] = await connection.query(
                 'INSERT INTO citas (id_paciente, id_medico, id_especialidad, fecha, hora, motivo, estado) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                [id_paciente, id_medico, id_especialidad, fecha, hora, motivo, 'programada']
+                [paciente_id, id_medico, id_especialidad, fecha, hora, motivo, 'programada']
             );
             console.log('Resultado de la inserción:', result);
-
-             // Verificar que la cita se insertó correctamente
-        const [citaInsertada] = await connection.query(
-            'SELECT * FROM citas WHERE id_cita = ?',
-            [result.insertId]
-        );
+    
+            // Verificar que la cita se insertó correctamente
+            const [citaInsertada] = await connection.query(
+                'SELECT * FROM citas WHERE id_cita = ?',
+                [result.insertId]
+            );
     
             await connection.commit();
             res.status(201).json({ success: true, message: 'Cita creada con éxito', id: result.insertId });
         } catch (error) {
             if (connection) await connection.rollback();
             console.error('Error detallado al crear la cita:', error);
-            
+    
             // Manejar diferentes tipos de errores
-            if (error.message.includes('Faltan datos requeridos') || error.message.includes('ID de usuario no válido')) {
+            if (error.message.includes('Faltan datos requeridos') || error.message.includes('Se requiere id_paciente o id_usuario')) {
                 res.status(400).json({ success: false, message: error.message });
             } else if (error.message.includes('No se encontró un paciente')) {
                 res.status(404).json({ success: false, message: error.message });
@@ -142,44 +155,29 @@ const citasController = {
         } finally {
             if (connection) connection.release();
         }
-        console.log('Tipo de id_usuario recibido:', typeof req.body.id_usuario);
-        console.log('Valor de id_usuario recibido:', req.body.id_usuario);
     },
     
-    getAllEspecialidades: async (req, res) => {
-        try {
-            const [especialidades] = await pool.query('SELECT id_especialidad, nombre FROM especialidades');
-            res.json(especialidades);
-        } catch (error) {
-            console.error('Error al obtener especialidades:', error);
-            res.status(500).json({ message: 'Error en el servidor', error: error.message });
-        }
-    },
-
-    getMedicosPorEspecialidad: async (req, res) => {
-        try {
-            const { id_especialidad } = req.params;
-            const [medicos] = await pool.query(`
-                SELECT u.id_usuario, u.nombre, u.apellido
-                FROM usuario u
-                JOIN medicos m ON u.id_usuario = m.id_usuario
-                WHERE m.id_especialidad = ?
-            `, [id_especialidad]);
-            res.json(medicos);
-        } catch (error) {
-            console.error('Error al obtener médicos por especialidad:', error);
-            res.status(500).json({ message: 'Error en el servidor', error: error.message });
-        }
-    },
-
     getCitaById: async (req, res) => {
         try {
             const { id } = req.params;
-            const [cita] = await pool.query('SELECT * FROM citas WHERE id_cita = ?', [id]);
-            if (cita.length === 0) {
+            const [citas] = await pool.query(`
+                SELECT c.*, 
+                       u.nombre, u.apellido, u.ci, u.phone, u.email, u.direccion, u.fechanacimiento,
+                       e.nombre,
+                       um.nombre AS nombre_medico, um.apellido AS apellido_medico
+                FROM citas c
+                JOIN pacientes p ON c.id_paciente = p.id_paciente
+                JOIN usuario u ON p.id_usuario = u.id_usuario
+                JOIN especialidades e ON c.id_especialidad = e.id_especialidad
+                JOIN usuario um ON c.id_medico = um.id_usuario
+                WHERE c.id_cita = ?
+            `, [id]);
+
+            if (citas.length === 0) {
                 return res.status(404).json({ message: 'Cita no encontrada' });
             }
-            res.json(cita[0]);
+
+            res.json(citas[0]);
         } catch (error) {
             console.error('Error al obtener la cita:', error);
             res.status(500).json({ message: 'Error en el servidor', error: error.message });
@@ -252,7 +250,7 @@ const citasController = {
                 SELECT 
                 c.id_cita, c.fecha, c.hora, c.motivo, c.estado,
                 up.nombre AS nombre_paciente, up.apellido AS apellido_paciente,
-                e.detalle_especialidad,
+                e.nombre,
                 um.nombre AS nombre_medico, um.apellido AS apellido_medico
             FROM citas c
             JOIN pacientes p ON c.id_paciente = p.id_paciente
@@ -282,13 +280,17 @@ const citasController = {
 
     actualizarEstadoCita: async (req, res) => {
         try {
-            const { id_cita } = req.params;
+            const { id } = req.params; // Cambiado de id_cita a id para coincidir con la ruta
             const { estado } = req.body;
-            const id_medico = req.session.user.id_usuario; // Asegurarse de que el médico solo pueda actualizar sus propias citas
+            const id_medico = req.session.user.id_usuario;
+    
+            if (estado !== 'Completada' && estado !== 'Cancelada') {
+                return res.status(400).json({ message: 'Estado no válido' });
+            }
     
             const [result] = await pool.query(
                 'UPDATE citas SET estado = ? WHERE id_cita = ? AND id_medico = ?',
-                [estado, id_cita, id_medico]
+                [estado, id, id_medico]
             );
     
             if (result.affectedRows === 0) {
@@ -301,27 +303,55 @@ const citasController = {
             res.status(500).json({ message: 'Error en el servidor', error: error.message });
         }
     },
+    
 
-    cancelarCita: async (req, res) => {
+    getHistorialMedico: async (req, res) => {
         try {
-            const { id } = req.params;
-            
-            const [result] = await pool.query(
-                'UPDATE citas SET estado = "cancelada" WHERE id_cita = ?',
-                [id]
-            );
-    
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ message: 'Cita no encontrada' });
-            }
-    
-            res.json({ message: 'Cita cancelada con éxito' });
+            const { id_paciente } = req.params;
+            const [historial] = await pool.query(`
+                SELECT c.fecha, c.hora, c.motivo, 
+                       e.nombre,
+                       um.nombre AS nombre_medico, um.apellido AS apellido_medico
+                FROM citas c
+                JOIN especialidades e ON c.id_especialidad = e.id_especialidad
+                JOIN usuario um ON c.id_medico = um.id_usuario
+                WHERE c.id_paciente = ?
+                ORDER BY c.fecha DESC, c.hora DESC
+            `, [id_paciente]);
+
+            res.json(historial);
         } catch (error) {
-            console.error('Error al cancelar la cita:', error);
+            console.error('Error al obtener historial médico:', error);
             res.status(500).json({ message: 'Error en el servidor', error: error.message });
         }
     },
 
+    buscarPacientePorCI: async (req, res) => {
+        try {
+            const { ci } = req.query;
+            if (!ci) {
+                return res.status(400).json({ message: 'Se requiere el CI del paciente' });
+            }
+    
+            const [pacientes] = await pool.query(`
+                SELECT p.id_paciente, u.id_usuario, u.nombre, u.apellido, u.ci, u.fechanacimiento
+                FROM pacientes p
+                JOIN usuario u ON p.id_usuario = u.id_usuario
+                WHERE u.ci = ?
+            `, [ci]);
+    
+            if (pacientes.length === 0) {
+                return res.status(404).json({ message: 'Paciente no encontrado' });
+            }
+    
+            console.log('Paciente encontrado:', pacientes[0]); // Para depuración
+    
+            res.json(pacientes[0]);
+        } catch (error) {
+            console.error('Error al buscar paciente por CI:', error);
+            res.status(500).json({ message: 'Error en el servidor', error: error.message });
+        }
+    },
 
 };
 

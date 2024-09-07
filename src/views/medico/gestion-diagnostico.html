@@ -1,0 +1,103 @@
+<link rel="stylesheet" href="/views/funcionalidad_styles/gestion-diagnostico.css">
+<div class="diagnostico-container">
+    <h1>Gestión de Diagnóstico Médico</h1>
+    
+    <div id="info-paciente" class="seccion">
+        <h2>Información base para un diagnóstico</h2>
+        <div id="datos-paciente">
+            <!-- Los datos del paciente se cargarán aquí dinámicamente -->
+        </div>
+        <button id="btn-actualizar-paciente" class="btn btn-secondary">Actualizar Datos del Paciente</button>
+    </div>
+
+    <div id="nuevo-diagnostico" class="seccion">
+        <h2>Nuevo Diagnóstico</h2>
+        <form id="form-diagnostico">
+            <input type="hidden" id="id_cita" name="id_cita">
+            <div class="form-group">
+                <label for="peso">Peso (kg):</label>
+                <input type="number" id="peso" name="peso" step="0.1" required>
+            </div>
+            <div class="form-group">
+                <label for="talla">Talla (cm):</label>
+                <input type="number" id="talla" name="talla" required>
+            </div>
+            <div class="form-group">
+                <label for="diagnostico">Diagnóstico:</label>
+                <textarea id="diagnostico" name="diagnostico" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="receta">Receta:</label>
+                <textarea id="receta" name="receta" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="enfermedad">Enfermedad:</label>
+                <select id="enfermedad" name="id_enfermedad" required>
+                    <option value="">Seleccione una enfermedad</option>
+                </select>
+            </div>
+            <div id="enfermedad-detalles" class="enfermedad-detalles">
+                <p><strong>Código:</strong> <span id="enfermedad-codigo"></span></p>
+                <p><strong>Sistema Afectado:</strong> <span id="enfermedad-sistema"></span></p>
+                <p><strong>Descripción:</strong> <span id="enfermedad-descripcion"></span></p>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar Diagnóstico</button>
+            <button id="btn-cancelar-cita" type="button" class="btn btn-danger">Cancelar Cita</button>
+        </form>
+    </div>
+
+    <div id="historial-diagnosticos" class="seccion">
+        <h2>Historial de Diagnósticos</h2>
+        <table id="tabla-diagnosticos">
+            <thead>
+                <tr>
+                    <th>Fecha de Cita</th>
+                    <th>Hora</th>
+                    <th>Médico</th>
+                    <th>Especialidad</th>
+                    <th>Peso</th>
+                    <th>Talla</th>
+                    <th>Diagnóstico</th>
+                    <th>Receta</th>
+                    <th>Enfermedad</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpo-tabla-diagnosticos">
+                <!-- Los diagnósticos se cargarán aquí dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="modalActualizarPaciente" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Actualizar Datos del Paciente</h2>
+            <form id="form-actualizar-paciente">
+                <input type="hidden" id="id_paciente" name="id_paciente">
+                <div class="form-group">
+                    <label for="genero">Género:</label>
+                    <select id="genero" name="genero" required>
+                        <!-- Opciones  -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tipo_sangre">Tipo de Sangre:</label>
+                    <select id="tipo_sangre" name="tipo_sangre" required>
+                        <!-- Opciones  -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="alergias">Alergias:</label>
+                    <select id="alergias" name="alergias" required onchange="toggleDetalleAlergia()">
+                        <!-- Opciones  -->
+                    </select>
+                </div>
+                <div id="detalle_alergia_container">
+                    <label for="detalle_alergia">Detalle de Alergia:</label>
+                    <input type="text" id="detalle_alergia" name="detalle_alergia">
+                </div>
+                <button type="submit" class="btn btn-primary">Actualizar</button>
+            </form>
+        </div>
+    </div>
+</div>
