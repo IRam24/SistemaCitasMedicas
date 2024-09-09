@@ -296,3 +296,4 @@ function limpiarFormulario() {
 }
 setupEventListeners();
 document.addEventListener('DOMContentLoaded', setupEventListeners);
+cargarConsultorios();

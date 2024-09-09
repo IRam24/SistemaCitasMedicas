@@ -1,129 +1,147 @@
+// gestion-especialidades.js
+
 document.addEventListener('DOMContentLoaded', function() {
     cargarEspecialidades();
-    document.getElementById('formNuevaEspecialidad').addEventListener('submit', agregarEspecialidad);
-    document.getElementById('formEditarEspecialidad').addEventListener('submit', handleEditarEspecialidad);
-    document.getElementById('cancelarEdicion').addEventListener('click', ocultarFormularioEdicion);
+    
+    // Event listeners
+    document.getElementById('formNuevaEspecialidad').addEventListener('submit', crearEspecialidad);
+    document.getElementById('formEditarEspecialidad').addEventListener('submit', guardarEdicionEspecialidad);
+    document.getElementById('cancelarEdicion').addEventListener('click', cancelarEdicion);
 });
 
-async function cargarEspecialidades() {
-    try {
-        const response = await fetch('/api/especialidades');
-        const especialidades = await response.json();
-        const lista = document.getElementById('listaEspecialidades');
-        lista.innerHTML = '';
-        especialidades.forEach(especialidad => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                ${especialidad.nombre}
-                <button onclick="mostrarFormularioEdicion(${especialidad.id_especialidad}, '${especialidad.nombre}')">Editar</button>
-                <button onclick="eliminarEspecialidad(${especialidad.id_especialidad})">Eliminar</button>
-            `;
-            li.addEventListener('click', () => mostrarDetallesEspecialidad(especialidad.id_especialidad));
-            lista.appendChild(li);
+function cargarEspecialidades() {
+    fetch('/especialidades')
+        .then(response => response.json())
+        .then(especialidades => {
+            const lista = document.getElementById('listaEspecialidades');
+            lista.innerHTML = '';
+            especialidades.forEach(esp => {
+                const li = document.createElement('li');
+                li.dataset.id = esp.id_especialidad;
+                li.innerHTML = `
+                    <strong>${esp.nombre}</strong> - ${esp.detalle_especialidad}
+                    <div class="acciones-especialidad">
+                        <button class="btn-editar">Editar</button>
+                        <button class="btn-eliminar">Eliminar</button>
+                    </div>
+                `;
+                lista.appendChild(li);
+
+                // Agregar event listeners a los botones
+                li.querySelector('.btn-editar').addEventListener('click', () => editarEspecialidad(esp.id_especialidad, esp.nombre, esp.detalle_especialidad));
+                li.querySelector('.btn-eliminar').addEventListener('click', () => eliminarEspecialidad(esp.id_especialidad));
+            });
+        })
+        .catch(error => {
+            console.error('Error al cargar especialidades:', error);
+            mostrarMensaje('Error al cargar especialidades', 'error');
         });
-    } catch (error) {
-        console.error('Error al cargar especialidades:', error);
-        alert('Error al cargar las especialidades');
-    }
 }
 
-async function agregarEspecialidad(event) {
-    event.preventDefault();
-    const detalle_especialidad = document.getElementById('nombreEspecialidad').value;
-    try {
-        const response = await fetch('/api/especialidades', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ detalle_especialidad }),
-        });
-        if (response.ok) {
-            alert('Especialidad agregada con éxito');
-            document.getElementById('nombreEspecialidad').value = '';
-            cargarEspecialidades();
-        } else {
-            throw new Error('Error al agregar la especialidad');
+function crearEspecialidad(event) {
+    event.preventDefault(); // Esto es crucial para evitar que el formulario se envíe de manera tradicional
+    const nombre = document.getElementById('nombreEspecialidad').value;
+    const detalle_especialidad = document.getElementById('detalleEspecialidad').value;
+    fetch('/especialidades', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // Asegúrate de incluir el token de autenticación si es necesario
+            // 'Authorization': 'Bearer ' + tuTokenDeAutenticacion
+        },
+        body: JSON.stringify({ nombre, detalle_especialidad }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al crear especialidad');
         }
-    } catch (error) {
+        return response.json();
+    })
+    .then(data => {
+        mostrarMensaje(data.message, 'success');
+        document.getElementById('formNuevaEspecialidad').reset();
+        cargarEspecialidades();
+    })
+    .catch(error => {
         console.error('Error:', error);
-        alert('Error al agregar la especialidad');
-    }
+        mostrarMensaje('Error al crear especialidad', 'error');
+    });
 }
 
-async function mostrarDetallesEspecialidad(id_especialidad) {
-    try {
-        const response = await fetch(`/api/especialidades/${id_especialidad}/medicos`);
-        const medicos = await response.json();
-        const detalles = document.querySelector('.detalles-especialidad');
-        const nombreEspecialidad = document.getElementById('nombreEspecialidadDetalle');
-        const listaMedicos = document.getElementById('listaMedicos');
-        
-        nombreEspecialidad.textContent = 'Especialidad ' + id_especialidad;
-        listaMedicos.innerHTML = '';
-        medicos.forEach(medico => {
-            const li = document.createElement('li');
-            li.textContent = `${medico.nombre} ${medico.apellido}`;
-            listaMedicos.appendChild(li);
-        });
-        
-        detalles.style.display = 'block';
-    } catch (error) {
-        console.error('Error al cargar detalles de la especialidad:', error);
-        alert('Error al cargar los detalles de la especialidad');
-    }
-}
+// Asegúrate de que este evento esté correctamente vinculado
+document.getElementById('formNuevaEspecialidad').addEventListener('submit', crearEspecialidad);
 
-function mostrarFormularioEdicion(id, nombre) {
+function editarEspecialidad(id, nombre, detalle) {
     document.getElementById('editarIdEspecialidad').value = id;
     document.getElementById('editarNombreEspecialidad').value = nombre;
+    document.getElementById('editarDetalleEspecialidad').value = detalle;
     document.querySelector('.editar-especialidad').style.display = 'block';
 }
 
-function ocultarFormularioEdicion() {
-    document.querySelector('.editar-especialidad').style.display = 'none';
-}
-
-async function handleEditarEspecialidad(event) {
+function guardarEdicionEspecialidad(event) {
     event.preventDefault();
-    const id_especialidad = document.getElementById('editarIdEspecialidad').value;
-    const detalle_especialidad = document.getElementById('editarNombreEspecialidad').value;
-    try {
-        const response = await fetch(`/api/especialidades/${id_especialidad}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ detalle_especialidad }),
-        });
-        if (response.ok) {
-            alert('Especialidad actualizada con éxito');
-            ocultarFormularioEdicion();
-            cargarEspecialidades();
-        } else {
-            throw new Error('Error al actualizar la especialidad');
+    const id = document.getElementById('editarIdEspecialidad').value;
+    const nombre = document.getElementById('editarNombreEspecialidad').value;
+    const detalle_especialidad = document.getElementById('editarDetalleEspecialidad').value;
+    fetch(`/especialidades/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            // Asegúrate de incluir el token de autenticación si es necesario
+            // 'Authorization': 'Bearer ' + tuTokenDeAutenticacion
+        },
+        body: JSON.stringify({ nombre, detalle_especialidad }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al actualizar especialidad');
         }
-    } catch (error) {
+        return response.json();
+    })
+    .then(data => {
+        mostrarMensaje(data.message, 'success');
+        document.querySelector('.editar-especialidad').style.display = 'none';
+        cargarEspecialidades();
+    })
+    .catch(error => {
         console.error('Error:', error);
-        alert('Error al actualizar la especialidad');
+        mostrarMensaje('Error al actualizar especialidad', 'error');
+    });
+}
+
+function eliminarEspecialidad(id) {
+    if (confirm('¿Está seguro de que desea eliminar esta especialidad?')) {
+        fetch(`/especialidades/${id}`, {
+            method: 'DELETE',
+            headers: {
+                // Asegúrate de incluir el token de autenticación si es necesario
+                // 'Authorization': 'Bearer ' + tuTokenDeAutenticacion
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al eliminar especialidad');
+            }
+            return response.json();
+        })
+        .then(data => {
+            mostrarMensaje(data.message, 'success');
+            cargarEspecialidades();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarMensaje('Error al eliminar especialidad', 'error');
+        });
     }
 }
 
-async function eliminarEspecialidad(id_especialidad) {
-    if (confirm('¿Está seguro de que desea eliminar esta especialidad?')) {
-        try {
-            const response = await fetch(`/api/especialidades/${id_especialidad}`, {
-                method: 'DELETE',
-            });
-            if (response.ok) {
-                alert('Especialidad eliminada con éxito');
-                cargarEspecialidades();
-            } else {
-                throw new Error('Error al eliminar la especialidad');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error al eliminar la especialidad');
-        }
-    }
+function mostrarMensaje(mensaje, tipo) {
+    const mensajeElement = document.createElement('div');
+    mensajeElement.textContent = mensaje;
+    mensajeElement.className = tipo === 'error' ? 'error-message' : 'success-message';
+    document.querySelector('.especialidades-container').prepend(mensajeElement);
+    setTimeout(() => mensajeElement.remove(), 3000);
 }
+
+document.addEventListener('DOMContentLoaded', setupEventListeners);
+cargarEspecialidades();

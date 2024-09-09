@@ -107,7 +107,11 @@ function mostrarUsuarios(usuarios) {
     }
     tbody.innerHTML = '';
     usuarios.forEach(usuario => {
-        const especialidad = usuario.especialidad || (usuario.rol === 'medico' ? 'Sin asignar' : 'N/A');
+        let especialidad = 'N/A';
+        if (usuario.rol === 'medico') {
+            especialidad = usuario.especialidad ? usuario.especialidad : 'Sin asignar';
+        }
+        
         tbody.innerHTML += `
             <tr>
                 <td>${usuario.nombre}</td>
@@ -193,13 +197,42 @@ function editarUsuario(idUsuario) {
             document.getElementById('nombre').value = usuario.nombre;
             document.getElementById('apellido').value = usuario.apellido;
             document.getElementById('email').value = usuario.email;
-            document.getElementById('rol').value = usuario.rol;
+            
+            // Mostrar el rol pero deshabilitarlo
+            const rolSelect = document.getElementById('rol');
+            rolSelect.value = usuario.rol;
+            rolSelect.disabled = true;
+            
+            // Añadir un campo oculto para mantener el valor del rol
+            let rolHiddenInput = document.getElementById('rol_hidden');
+            if (!rolHiddenInput) {
+                rolHiddenInput = document.createElement('input');
+                rolHiddenInput.type = 'hidden';
+                rolHiddenInput.id = 'rol_hidden';
+                rolHiddenInput.name = 'rol';
+                document.getElementById('formularioUsuario').appendChild(rolHiddenInput);
+            }
+            rolHiddenInput.value = usuario.rol;
+
             toggleCamposMedico();
             if (usuario.rol === 'medico') {
                 document.getElementById('especialidad').value = usuario.id_especialidad || '';
             }
+
             document.getElementById('formularioTitulo').textContent = 'Editar Usuario';
             document.getElementById('formularioUsuario').style.display = 'block';
+
+            // Añadir una nota indicando que el rol no es editable
+            let rolNote = document.getElementById('rol-note');
+            if (!rolNote) {
+                rolNote = document.createElement('p');
+                rolNote.id = 'rol-note';
+                rolNote.style.color = '#666';
+                rolNote.style.fontSize = '0.9em';
+                rolNote.style.marginTop = '5px';
+                rolSelect.parentNode.insertBefore(rolNote, rolSelect.nextSibling);
+            }
+            rolNote.textContent = 'El rol no puede ser modificado.';
         })
         .catch(error => {
             console.error('Error al cargar datos del usuario:', error);
@@ -211,22 +244,19 @@ function eliminarUsuario(idUsuario) {
     if (confirm('¿Está seguro de que desea eliminar este usuario?')) {
         fetch(`/api/users/${idUsuario}`, { method: 'DELETE' })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                if (response.ok) {
+                    return response.json();
                 }
-                return response.json();
+                // Si la respuesta no es ok, aún queremos leer el cuerpo de la respuesta
+                return response.json().then(err => Promise.reject(err));
             })
             .then(result => {
-                if (result.success) {
-                    alert('Usuario eliminado con éxito');
-                    cargarUsuarios();
-                } else {
-                    alert('Error al eliminar usuario: ' + result.message);
-                }
+                alert(result.message);
+                cargarUsuarios(); // Recargar la lista de usuarios
             })
             .catch(error => {
-                console.error('Error al eliminar usuario:', error);
-                alert('Error al eliminar usuario');
+                console.error('Error al eliminar/desactivar usuario:', error);
+                alert('Error: ' + (error.message || 'No se pudo eliminar/desactivar el usuario'));
             });
     }
 }

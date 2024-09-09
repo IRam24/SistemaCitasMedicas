@@ -1,7 +1,5 @@
 // userController.js
 const pool = require('../config/database');
-//const bcrypt = require('bcrypt');
-
 const userController = {
   // Autenticación
   login: async (req, res) => {
@@ -148,11 +146,16 @@ if (rol === 'medico') {
 },
 
   // Obtener todos los usuarios (solo para administradores)
-  getAll: async (req, res) => {
+  // En userController.js
+getAll: async (req, res) => {
     try {
         const filtro = req.query.filtro || 'todos';
         let query = `
-            SELECT u.id_usuario, u.nombre, u.apellido, u.email, r.asign_role as rol 
+            SELECT u.id_usuario, u.nombre, u.apellido, u.email, r.asign_role as rol, 
+                   CASE 
+                     WHEN r.asign_role = 'medico' THEN e.nombre
+                     ELSE 'N/A'
+                   END as especialidad
             FROM usuario u 
             JOIN roles r ON u.rol = r.id
             LEFT JOIN medicos m ON u.id_usuario = m.id_usuario
@@ -176,7 +179,7 @@ if (rol === 'medico') {
   // Obtener un usuario por ID
   getById: async (req, res) => {
     try {
-      const [users] = await pool.query('SELECT u.*, r.asign_role as rol FROM usuario u JOIN roles r ON u.rol = r.id WHERE u.id = ?', [req.params.id]);
+      const [users] = await pool.query('SELECT u.*, r.asign_role as rol FROM usuario u JOIN roles r ON u.rol = r.id WHERE u.id_usuario = ?', [req.params.id]);
       if (users.length === 0) {
         return res.status(404).json({ message: 'Usuario no encontrado' });
       }
@@ -190,76 +193,159 @@ if (rol === 'medico') {
   // Actualizar usuario
   update: async (req, res) => {
     try {
-      const { nombre, apellido, ci, phone, email, direccion, rol } = req.body;
-      const [roles] = await pool.query('SELECT id FROM roles WHERE asign_role = ?', [rol]);
-      if (roles.length === 0) {
-        return res.status(400).json({ message: 'Rol no válido' });
-      }
-      const rolId = roles[0].id;
+        const { nombre, apellido, ci, phone, email, direccion } = req.body;
+        const userId = req.params.id;
 
-      const [result] = await pool.query(
-        'UPDATE usuario SET nombre = ?, apellido = ?, ci = ?, phone = ?, email = ?, direccion = ?, rol = ? WHERE id = ?',
-        [nombre, apellido, ci, phone, email, direccion, rolId, req.params.id]
-      );
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Usuario no encontrado' });
-      }
-      res.json({ message: 'Usuario actualizado con éxito' });
+        // Primero, obtenemos el rol actual del usuario
+        const [currentUser] = await pool.query('SELECT rol FROM usuario WHERE id_usuario = ?', [userId]);
+        if (currentUser.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+        const currentRolId = currentUser[0].rol;
+
+        // Actualizamos los campos permitidos, manteniendo el rol actual
+        const [result] = await pool.query(
+            'UPDATE usuario SET nombre = ?, apellido = ?, ci = ?, phone = ?, email = ?, direccion = ? WHERE id_usuario = ?',
+            [nombre, apellido, ci, phone, email, direccion, userId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        // Si el usuario es un médico, actualizamos la especialidad si se proporciona
+        if (req.body.id_especialidad) {
+            const [rolInfo] = await pool.query('SELECT asign_role FROM roles WHERE id = ?', [currentRolId]);
+            if (rolInfo[0].asign_role === 'medico') {
+                await pool.query(
+                    'UPDATE medicos SET id_especialidad = ? WHERE id_usuario = ?',
+                    [req.body.id_especialidad, userId]
+                );
+            }
+        }
+
+        res.json({ message: 'Usuario actualizado con éxito' });
     } catch (error) {
-      console.error('Error al actualizar usuario:', error);
-      res.status(500).json({ message: 'Error en el servidor' });
+        console.error('Error al actualizar usuario:', error);
+        res.status(500).json({ message: 'Error en el servidor' });
     }
-  },
+},
 
   // Eliminar usuario
   delete: async (req, res) => {
-    try {
-      const [result] = await pool.query('DELETE FROM usuario WHERE id = ?', [req.params.id]);
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Usuario no encontrado' });
-      }
-      res.json({ message: 'Usuario eliminado con éxito' });
-    } catch (error) {
-      console.error('Error al eliminar usuario:', error);
-      res.status(500).json({ message: 'Error en el servidor' });
-    }
-  },
-  
-  createUser: async (req, res) => {
-    const { nombre, apellido, email, password, rol, id_especialidad } = req.body;
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
 
-        // Primero, obtenemos el ID del rol basado en el nombre del rol proporcionado
+        const userId = req.params.id;
+
+        // Verificar si el usuario existe y obtener su rol
+        const [user] = await connection.query('SELECT id_usuario, rol FROM usuario WHERE id_usuario = ?', [userId]);
+        if (user.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        // Obtener el nombre del rol
+        const [roleName] = await connection.query('SELECT asign_role FROM roles WHERE id = ?', [user[0].rol]);
+        const userRole = roleName[0].asign_role;
+
+        // Verificar y eliminar registros asociados basados en el rol
+        if (userRole === 'medico') {
+            // Verificar si el médico tiene citas
+            const [citasMedico] = await connection.query('SELECT COUNT(*) as count FROM citas WHERE id_medico = ?', [userId]);
+            if (citasMedico[0].count > 0) {
+                return res.status(400).json({ message: 'No se puede eliminar el médico porque tiene citas asociadas' });
+            }
+            await connection.query('DELETE FROM medicos WHERE id_usuario = ?', [userId]);
+        } else if (userRole === 'paciente') {
+            // Verificar si el paciente tiene citas
+            const [citasPaciente] = await connection.query('SELECT COUNT(*) as count FROM citas WHERE id_paciente = (SELECT id_paciente FROM pacientes WHERE id_usuario = ?)', [userId]);
+            if (citasPaciente[0].count > 0) {
+                return res.status(400).json({ message: 'No se puede eliminar el paciente porque tiene citas asociadas' });
+            }
+            await connection.query('DELETE FROM pacientes WHERE id_usuario = ?', [userId]);
+        }
+
+        // Intentar eliminar el usuario
+        const [deleteResult] = await connection.query('DELETE FROM usuario WHERE id_usuario = ?', [userId]);
+
+        if (deleteResult.affectedRows === 0) {
+            // Si no se pudo eliminar, desactivamos el usuario
+            await connection.query('UPDATE usuario SET is_active = FALSE WHERE id_usuario = ?', [userId]);
+            await connection.commit();
+            return res.json({ message: 'Usuario desactivado debido a restricciones. Sus registros asociados han sido eliminados.' });
+        }
+
+        await connection.commit();
+        res.json({ message: 'Usuario y registros asociados eliminados con éxito' });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error al eliminar/desactivar usuario:', error);
+        res.status(500).json({ message: 'Error en el servidor: ' + error.message });
+    } finally {
+        connection.release();
+    }
+},
+  
+  createUser: async (req, res) => {
+    const { 
+        nombre, 
+        apellido, 
+        email, 
+        password, 
+        rol, 
+        id_especialidad,
+        ci,
+        phone,
+        direccion,
+        fechanacimiento
+    } = req.body;
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Obtener el ID del rol
         const [roles] = await connection.query('SELECT id FROM roles WHERE asign_role = ?', [rol]);
         if (roles.length === 0) {
             throw new Error('Rol no válido');
         }
         const rolId = roles[0].id;
 
-        // Insertar en la tabla usuario con el ID del rol
+        // Insertar en la tabla usuario con todos los campos
         const [userResult] = await connection.query(
-            'INSERT INTO usuario (nombre, apellido, email, password, rol) VALUES (?, ?, ?, ?, ?)',
-            [nombre, apellido, email, password, rolId]
+            `INSERT INTO usuario 
+            (nombre, apellido, email, password, rol, ci, phone, direccion, fechanacimiento, is_active) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [nombre, apellido, email, password, rolId, ci, phone, direccion, fechanacimiento, true]
         );
 
+        const userId = userResult.insertId;
+        console.log('Nuevo usuario creado con ID:', userId); // Log para depuración
+
         if (rol === 'medico' && id_especialidad) {
-            // Insertar en la tabla medicos si el rol es médico
+            // Verificar si la especialidad existe
+            const [especialidades] = await connection.query('SELECT id_especialidad FROM especialidades WHERE id_especialidad = ?', [id_especialidad]);
+            if (especialidades.length === 0) {
+                throw new Error('La especialidad seleccionada no es válida');
+            }
+
+            // Insertar en la tabla de médicos
             await connection.query(
                 'INSERT INTO medicos (id_usuario, id_especialidad) VALUES (?, ?)',
-                [userResult.insertId, id_especialidad]
+                [userId, id_especialidad]
             );
+            console.log('Médico insertado con ID de usuario:', userId); // Log para depuración
         } else if (rol === 'paciente') {
-            // Insertar en la tabla pacientes si el rol es paciente
+            // Insertar en la tabla pacientes
             await connection.query(
-                'INSERT INTO pacientes (id_usuario) VALUES (?)',
-                [userResult.insertId]
+                'INSERT INTO pacientes (id_usuario, fecha_registro) VALUES (?, CURDATE())',
+                [userId]
             );
+            console.log('Paciente insertado con ID de usuario:', userId); // Log para depuración
         }
 
         await connection.commit();
-        res.status(201).json({ message: 'Usuario creado con éxito', id: userResult.insertId });
+        res.status(201).json({ message: 'Usuario creado con éxito', id: userId });
     } catch (error) {
         await connection.rollback();
         console.error('Error al crear usuario:', error);

@@ -96,4 +96,8 @@ function cargarScript(url) {
         document.body.appendChild(script);
     });
 }
+document.addEventListener('DOMContentLoaded', setupEventListeners);
+cargarInfoUsuario();
+cargarScript(url)();
+
 

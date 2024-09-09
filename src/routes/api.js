@@ -9,6 +9,7 @@ const citasController = require('../controllers/CitasController');
 const consultorioController = require('../controllers/consultorioController'); 
 const diagnosticoController = require('../controllers/diagnosticoController');
 const historiaController = require('../controllers/historiaController');
+const estadisticasController = require('../controllers/estadisticasController');
 
 // Importar middleware de autenticación
 const { isAuthenticated } = require('../middleware/authMiddleware');
@@ -77,6 +78,12 @@ router.put('/consultorios/:id', isAuthenticated, consultorioController.updateCon
 router.delete('/consultorios/:id', isAuthenticated, consultorioController.deleteConsultorio);
 router.post('/consultorios/:id/asignar', isAuthenticated, consultorioController.asignarMedico);
 router.post('/consultorios/:id/liberar', isAuthenticated, consultorioController.liberarConsultorio);
+
+// Rutas de estadísticas
+router.get('/api/estadisticas/usuarios', isAuthenticated, estadisticasController.getUsuariosStats);
+router.get('/api/estadisticas/citas', isAuthenticated, estadisticasController.getCitasStats);
+router.get('/api/estadisticas/especialidades', isAuthenticated, estadisticasController.getEspecialidadesStats);
+router.get('/api/estadisticas/dashboard', isAuthenticated, estadisticasController.getDashboardStats);
 
 // Ruta para el dashboard
 router.get('/dashboard', isAuthenticated, userController.getDashboardData);
